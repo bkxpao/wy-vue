@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "name": "账号管理",
+    "parentid": "0",
+    "path": "/"
+  },
+  {
+    "id": "2",
+    "name": "企业认证",
+    "parentid": "0",
+    "path": "/certificaty/enterprise"
+  },
+  {
+    "id": "3",
+    "name": "个人认证",
+    "parentid": "0",
+    "path": "/certificaty/personal"
+  },
+  {
+    "id": "4",
+    "name": "成员管理",
+    "parentid": "1",
+    "path": "/"
+  },
+  {
+    "id": "5",
+    "name": "员工申请",
+    "parentid": "4",
+    "path": "/account/apply"
+  },
+  {
+    "id": "6",
+    "name": "员工管理",
+    "parentid": "4",
+    "path": "/account/staff"
+  },
+  {
+    "id": "7",
+    "name": "角色管理",
+    "parentid": "4",
+    "path": "/account/role"
+  },
+  {
+    "id": "8",
+    "name": "权限管理",
+    "parentid": "4",
+    "path": "/account/auther"
+  }
+]
