@@ -5,15 +5,20 @@ const url = require('url')
 const axios = require('axios')
 const publicPath = ''
 /*----------------jsonServer---------*/
+/*引入json-server*/
 const jsonServer = require('json-server')
+/*搭建一个server*/
 const apiServer = jsonServer.create()
+/*将db.json关联到server*/
 const apiRouter = jsonServer.router('db.json')
 const middlewares = jsonServer.defaults()
 apiServer.use(middlewares)
-apiServer.use('/api', apiRouter)
-apiServer.listen(8081, () => {
+apiServer.use(apiRouter)
+/*监听端口*/
+apiServer.listen(8080, () => {
     console.log('JSON Server is running')
 })
+/*----------------jsonServer---------*/
 module.exports = (options = {}) => ({
   entry: {
     vendor: './src/vendor',
@@ -60,7 +65,7 @@ module.exports = (options = {}) => ({
   ],
   resolve: {
     alias: {
-      '~': resolve(__dirname, 'src')
+      '~': resolve(__dirname, 'src'),
     },
     extensions: ['.js', '.vue', '.json', '.css']
   },
