@@ -4,7 +4,7 @@
             <el-dropdown>
                 <i class="el-icon-setting" style="margin-right: 15px"></i>
                 <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item>退出</el-dropdown-item>
+                    <el-dropdown-item @click.native="logout" >退出</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
             <span>{{ username }}</span>
@@ -69,6 +69,10 @@
                 }
                 JSON.stringify(itemArr)
                 return itemArr
+            },
+            logout() {
+                sessionStorage.clear()
+                this.$router.push('/login')
             }
         },
         mounted() {
@@ -76,11 +80,9 @@
             if (usermenu === null||usermenu.trim().length === 0) {
                 this.user_menu = this.initMenu();
                 sessionStorage.setItem('usermenu',JSON.stringify(this.user_menu))
-                console.log('init:', JSON.stringify(this.user_menu))
 
             } else {
                 this.user_menu = JSON.parse(usermenu)
-                console.log('session:', this.user_menu)
             }
 
         }

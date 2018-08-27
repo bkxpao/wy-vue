@@ -9,7 +9,7 @@ import LoginPage from '../pages/login'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
     mode: 'history',
     routes: [
         {
@@ -47,3 +47,19 @@ export default new Router({
     ]
 })
 
+router.beforeEach((to, from, next) => {
+    let login = sessionStorage.getItem('token')
+    let path = to.path
+    if (path === '/login') {
+        next()
+        return
+    }
+    if (login) {
+        next()
+    } else {
+        next({
+            path: '/login'
+        })
+    }
+})
+export default router
