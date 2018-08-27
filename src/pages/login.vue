@@ -20,7 +20,8 @@
                 <el-input
                         type="password"
                         v-model="LoginForm.password"
-                        placeholder="password" >
+                        placeholder="password"
+                        @keyup.enter.native="submit">
                 </el-input>
             </el-form-item>
 
@@ -63,8 +64,8 @@
                         {
                             required: true,
                             max: 14,
-                            min: 7,
-                            message: '用户名是必须的，长度为7-14位',
+                            min: 6,
+                            message: '用户名是必须的，长度为6-14位',
                             trigger: 'blur'
                         }
                     ],

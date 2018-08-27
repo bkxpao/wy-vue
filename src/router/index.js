@@ -6,6 +6,7 @@ import RoleManage from '../pages/menus/roleManage'
 import StaffApply from '../pages/menus/staffApply'
 import StaffManage from '../pages/menus/staffManage'
 import LoginPage from '../pages/login'
+import ReginPage from '../pages/regin'
 
 Vue.use(Router)
 
@@ -43,6 +44,11 @@ const router = new Router({
             path: '/login',
             name: '登陆界面',
             component: LoginPage
+        },
+        {
+            path: '/regin',
+            name: '注册界面',
+            component: ReginPage
         }
     ]
 })
@@ -51,6 +57,10 @@ router.beforeEach((to, from, next) => {
     let login = sessionStorage.getItem('token')
     let path = to.path
     if (path === '/login') {
+        next()
+        return
+    }
+    if (path === '/regin') {
         next()
         return
     }
