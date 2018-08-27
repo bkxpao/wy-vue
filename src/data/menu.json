@@ -1,50 +1,50 @@
 [
   {
-    "id": "1",
+    "id": "01",
     "name": "账号管理",
     "parentid": "0",
     "path": "/"
   },
   {
-    "id": "2",
+    "id": "02",
     "name": "企业认证",
     "parentid": "0",
     "path": "/certificaty/enterprise"
   },
   {
-    "id": "3",
+    "id": "03",
     "name": "个人认证",
     "parentid": "0",
     "path": "/certificaty/personal"
   },
   {
-    "id": "4",
+    "id": "0101",
     "name": "成员管理",
-    "parentid": "1",
+    "parentid": "01",
     "path": "/"
   },
   {
-    "id": "5",
+    "id": "010101",
     "name": "员工申请",
-    "parentid": "4",
+    "parentid": "0101",
     "path": "/account/apply"
   },
   {
-    "id": "6",
+    "id": "010102",
     "name": "员工管理",
-    "parentid": "4",
+    "parentid": "0101",
     "path": "/account/staff"
   },
   {
-    "id": "7",
+    "id": "010103",
     "name": "角色管理",
-    "parentid": "4",
+    "parentid": "0101",
     "path": "/account/role"
   },
   {
-    "id": "8",
+    "id": "010104",
     "name": "权限管理",
-    "parentid": "4",
+    "parentid": "0101",
     "path": "/account/auther"
   }
 ]

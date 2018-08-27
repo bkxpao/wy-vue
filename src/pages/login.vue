@@ -1,161 +1,151 @@
 <template>
-    <div class="login-wrap">
-        <div class="ms-title">登录管理系统</div>
-        <div class="ms-login">
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="0px" class="demo-ruleForm">
-                <div v-if="errorInfo">
-                    <span>{{errInfo}}</span>
-                </div>
-                <el-form-item prop="name">
-                    <el-input v-model="ruleForm.name" placeholder="账号" ></el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                    <el-input type="password" placeholder="密码" v-model="ruleForm.password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
-                </el-form-item>
-                <el-form-item  prop="validate">
-                    <el-input v-model="ruleForm.validate" class="validate-code" placeholder="验证码" ></el-input>
-                    <div class="code" @click="refreshCode">
-                        <s-identify :identifyCode="identifyCode"></s-identify>
-                    </div>
-                </el-form-item>
-                <div class="login-btn">
-                    <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
-                </div>
-                <p style="font-size:14px;line-height:30px;color:#999;cursor: pointer;float:right;" @click="handleCommand()">注册</p>
-            </el-form>
-        </div>
-    </div>
+    <el-main>
+        <el-form
+                :model="LoginForm"
+                ref="LoginForm"
+                :rules="rule"
+                label-width="0"
+                class="login-form">
+            <h3>用户登录系统</h3>
+
+            <el-form-item prop="username">
+                <el-input
+                        type="text"
+                        v-model="LoginForm.username"
+                        placeholder="username" >
+                </el-input>
+            </el-form-item>
+
+            <el-form-item prop="password">
+                <el-input
+                        type="password"
+                        v-model="LoginForm.password"
+                        placeholder="password" >
+                </el-input>
+            </el-form-item>
+
+            <el-form-item >
+                <el-button
+                        type="danger"
+                        class="submitBtn"
+                        round
+                        @click.native.prevent="submit"
+                        :loading="logining">
+                    登录
+                </el-button>
+                <el-button
+                        type="primary"
+                        class="resetBtn"
+                        round
+                        @click.native.prevent="reset">
+                    重置
+                </el-button>
+                <hr>
+                <p>还没有账号，马上去<span class="to" @click="toregin">注册</span></p>
+            </el-form-item>
+        </el-form>
+    </el-main>
 </template>
 
 <script>
+    import axios from 'axios'
     export default {
-        name: 'login',
-        data() {
+        // ....
+        data () {
             return {
-                identifyCodes: "1234567890",
-                identifyCode: "",
-                errorInfo : false,
-                ruleForm: {
-                    name: '',
-                    password: '',
-                    validate: ''
+                LoginForm: {
+                    username: '',
+                    password: ''
                 },
-                rules: {
-                    name: [
-                        { required: true, message: '请输入用户名', trigger: 'blur' }
+                logining: false,
+                rule: {
+                    username: [
+                        {
+                            required: true,
+                            max: 14,
+                            min: 7,
+                            message: '用户名是必须的，长度为7-14位',
+                            trigger: 'blur'
+                        }
                     ],
                     password: [
-                        { required: true, message: '请输入密码', trigger: 'blur' }
-                    ],
-                    validate: [
-                        { required: true, message: '请输入验证码', trigger: 'blur' }
+                        {
+                            required: true,
+                            message: '密码是必须的！',
+                            trigger: 'blur'
+                        }
                     ]
                 }
             }
         },
-        mounted() {
-            this.identifyCode = "";
-            this.makeCode(this.identifyCodes, 4);
-        },
         methods: {
-            submitForm(formName) {
-                const self = this;
-                self.$refs[formName].validate((valid) => {
+            // ...
+            submit () {
+                this.$refs.LoginForm.validate(valid => {
                     if (valid) {
-                        localStorage.setItem('ms_username',self.ruleForm.name);
-                        localStorage.setItem('ms_user',JSON.stringify(self.ruleForm));
-                        console.log(JSON.stringify(self.ruleForm));
-                        self.$http.post('/api/user/login',JSON.stringify(self.ruleForm))
-                            .then((response) => {
-                                console.log(response);
-                                if (response.data == -1) {
-                                    self.errorInfo = true;
-                                    self.errInfo = '该用户不存在';
-                                    console.log('该用户不存在')
-                                } else if (response.data == 0) {
-                                    console.log('密码错误')
-                                    self.errorInfo = true;
-                                    self.errInfo = '密码错误';
-                                } else if (response.status == 200) {
-                                    self.$router.push('/readme');
-                                }
-                            }).then((error) => {
-                            console.log(error);
+                        this.logining = true
+                        console.log('开始请求后台数据，验证返回之类的操作！')
+                        // 登录作为参数的用户信息
+                        let LoginParams = {
+                            username: this.LoginForm.username,
+                            password: this.LoginForm.password
+                        }
+                        // 调用axios登录接口
+                        axios.get('/api/login',{params:LoginParams}).then(res => {
+                            this.logining = false
+                            // 根据返回的code判断是否成功
+                            let {state, msg, username, token, funcs} = res.data
+                            console.log(LoginParams,res.data)
+                            if (state !== '00000') {
+                                this.$message({
+                                    type: 'error',
+                                    message: msg
+                                })
+                            } else {
+                                this.$message({
+                                    type: 'success',
+                                    message: '登陆成功'
+                                })
+                                // 将返回的数据注入sessionStorage
+                                console.log(JSON.stringify(username))
+                                sessionStorage.setItem('username', username)
+                                sessionStorage.setItem('token', token)
+                                sessionStorage.setItem('functions', JSON.stringify(funcs))
+                                // 跳转到我的信息的页面
+                                this.$router.push('/')
+                            }
+                            console.log(this.$message)
+
                         })
                     } else {
-                        console.log('error submit!!');
-                        return false;
+                        console.log('submit err')
                     }
-                });
+                })
             },
-            handleCommand() {
-                this.$router.push('/register');
+            reset () {
+                this.$refs.LoginForm.resetFields()
             },
-            randomNum(min, max) {
-                return Math.floor(Math.random() * (max - min) + min);
-            },
-            refreshCode() {
-                this.identifyCode = "";
-                this.makeCode(this.identifyCodes, 4);
-            },
-            makeCode(o, l) {
-                for (let i = 0; i < l; i++) {
-                    this.identifyCode += this.identifyCodes[
-                        this.randomNum(0, this.identifyCodes.length)
-                        ];
-                }
-                console.log(this.identifyCode);
+            toregin () {
+                this.$router.push('/regin')
             }
         }
     }
 </script>
 
 <style scoped>
-    .login-wrap{
-        position: relative;
-        width:100%;
-        height:100%;
-    }
-    .ms-title{
-        position: absolute;
-        top:50%;
-        width:100%;
-        margin-top: -230px;
-        text-align: center;
-        font-size:30px;
-        color: #fff;
-
-    }
-    .ms-login{
-        position: absolute;
-        left:50%;
-        top:50%;
-        width:300px;
-        height:240px;
-        margin:-150px 0 0 -190px;
-        padding:40px;
-        border-radius: 5px;
+    .login-form {
+        margin: 20px auto;
+        width: 310px;
         background: #fff;
+        box-shadow: 0 0 35px #B4BCCC;
+        padding: 30px 30px 0 30px;
+        border-radius: 25px;
     }
-    .ms-login span {
-        color: red;
+    .submitBtn {
+        width: 65%;
     }
-    .login-btn{
-        text-align: center;
-    }
-    .login-btn button{
-        width:100%;
-        height:36px;
-    }
-    .code {
-        width: 112px;
-        height: 35px;
-        border: 1px solid #ccc;
-        float: right;
-        border-radius: 2px;
-    }
-    .validate-code {
-        width: 136px;
-        float: left;
+    .to {
+        color: #67C23A;
+        cursor: pointer;
     }
 </style>

@@ -2,7 +2,8 @@ const state = {
     user: {
         username: '',
         password:'',
-        token: ''
+        token: '',
+        functions: ''
     }
 }
 export default state

@@ -5,6 +5,7 @@ const mutations = {
         state.user = user
         sessionStorage.setItem('username', user.username)
         sessionStorage.setItem('token', user.token)
+        sessionStorage.setItem('functions',user.functions)
     },
     [types.LOGOUT](state) {
         state.user = ''

@@ -7,7 +7,7 @@
                     <el-dropdown-item>退出</el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
-            <span>王小虎</span>
+            <span>{{ username }}</span>
         </el-header>
         <el-container style="height: 500px; border: 1px solid #eee">
             <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
@@ -34,25 +34,36 @@
         },
         data() {
             return {
-                user_auther: [1,2,3,4,5,6,7,8],
+                username: sessionStorage.getItem("username"),
                 menu_all: require('../data/menu'),
                 user_menu: []
-
             }
         },
         methods: {
+            initMenu() {
+                let tmp = [];
+                let menu_all = this.menu_all;
+                let menu_tmp = JSON.parse(sessionStorage.getItem('functions'));
+                console.log(menu_tmp)
+                for (let i=0; i< menu_all.length; i++) {
+                    for (let j=0;j< menu_tmp.length; j++) {
+                        if (this.menu_all[i].id == menu_tmp[j]) {
+                            tmp.push(this.menu_all[i]);
+                        }
+                    }
+                }
+                return this.getMenuTree(tmp, 0)
+            },
             getMenuTree(data, parentid) {
                 let itemArr = []
                 for (let i=0; i < data.length; i++) {
                     let node = data[i]
                     if (node.parentid == parentid) {
-                        console.log(parentid)
                         let newNode = {}
                         newNode.id = node.id
                         newNode.name = node.name
                         newNode.path = node.path
                         newNode.nodes = this.getMenuTree(data, node.id)
-                        console.log(JSON.stringify(newNode.nodes))
                         itemArr.push(newNode)
                     }
                 }
@@ -61,9 +72,17 @@
             }
         },
         mounted() {
-            console.log(JSON.stringify(this.menu_all))
-            this.user_menu = this.getMenuTree(this.menu_all, '0')
-            console.log(JSON.stringify(this.user_menu))
+            let usermenu = sessionStorage.getItem('usermenu');
+            if (usermenu === null||usermenu.trim().length === 0) {
+                this.user_menu = this.initMenu();
+                sessionStorage.setItem('usermenu',JSON.stringify(this.user_menu))
+                console.log('init:', JSON.stringify(this.user_menu))
+
+            } else {
+                this.user_menu = JSON.parse(usermenu)
+                console.log('session:', this.user_menu)
+            }
+
         }
     }
 </script>

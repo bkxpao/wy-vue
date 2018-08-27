@@ -5,6 +5,7 @@ import AutherManage from '../pages/menus/autherManage'
 import RoleManage from '../pages/menus/roleManage'
 import StaffApply from '../pages/menus/staffApply'
 import StaffManage from '../pages/menus/staffManage'
+import LoginPage from '../pages/login'
 
 Vue.use(Router)
 
@@ -37,6 +38,12 @@ export default new Router({
                     component: AutherManage
                 }
             ]
+        },
+        {
+            path: '/login',
+            name: '登陆界面',
+            component: LoginPage
         }
     ]
 })
+
