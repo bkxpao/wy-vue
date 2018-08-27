@@ -92,8 +92,6 @@
                 let reg=11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
                 if (value === '') {
                     return callback(new Error('电话号码是必须的'))
-                } else if (!Number.isInteger(value)) {
-                    return callback(new Error('电话号码必须是数字'))
                 } else if (!reg.test(value)) {
                     return callback(new Error('手机格式不正确'))
                 } else{
@@ -111,22 +109,18 @@
                 getCode: false,
                 btntxt: '获取验证码',
                 ReginForm: {
-                    username: '',
+                    tel: '',
                     password: '',
                     confirmpassword: '',
-                    tel: '',
                     telcode: '',
-                    email: '',
                     regincode: ''
                 },
                 logining: false,
                 rule: {
-                    username: [
+                    tel: [
                         {
                             required: true,
-                            max: 14,
-                            min: 6,
-                            message: '用户名是必须的，长度为6-14位',
+                            validator: telCheck,
                             trigger: 'blur'
                         }
                     ],
@@ -141,21 +135,6 @@
                         {
                             required: true,
                             validator: confirmpasswordCheck,
-                            trigger: 'blur'
-                        }
-                    ],
-                    tel: [
-                        {
-                            required: true,
-                            validator: telCheck,
-                            trigger: 'blur'
-                        }
-                    ],
-                    email: [
-                        {
-                            required: true,
-                            type: 'email',
-                            message: '请输入正确的电子邮件格式(xxx@xxx.com)',
                             trigger: 'blur'
                         }
                     ],

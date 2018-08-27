@@ -12,7 +12,7 @@
                 <el-input
                         type="text"
                         v-model="LoginForm.username"
-                        placeholder="username" >
+                        placeholder="请输入手机号" >
                 </el-input>
             </el-form-item>
 
@@ -20,12 +20,12 @@
                 <el-input
                         type="password"
                         v-model="LoginForm.password"
-                        placeholder="password"
+                        placeholder="请输入密码"
                         @keyup.enter.native="submit">
                 </el-input>
             </el-form-item>
 
-            <el-form-item >
+            <el-form-item>
                 <el-button
                         type="danger"
                         class="submitBtn"
@@ -51,8 +51,17 @@
 <script>
     import axios from 'axios'
     export default {
-        // ....
         data () {
+            let telCheck = (rule, value, callback) => {
+                let reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+                if (value === '') {
+                    return callback(new Error('手机号不能为空'))
+                } else if (!reg.test(value)) {
+                    return callback(new Error('手机格式不正确'))
+                } else {
+                    callback()
+                }
+            }
             return {
                 LoginForm: {
                     username: '',
@@ -63,9 +72,7 @@
                     username: [
                         {
                             required: true,
-                            max: 14,
-                            min: 6,
-                            message: '用户名是必须的，长度为6-14位',
+                            validator: telCheck,
                             trigger: 'blur'
                         }
                     ],
@@ -80,7 +87,6 @@
             }
         },
         methods: {
-            // ...
             submit () {
                 this.$refs.LoginForm.validate(valid => {
                     if (valid) {
