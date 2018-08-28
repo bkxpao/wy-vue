@@ -9,13 +9,13 @@
     "id": "02",
     "name": "企业认证",
     "parentid": "0",
-    "path": "/certificaty/enterprise"
+    "path": "/auth/company"
   },
   {
     "id": "03",
     "name": "个人认证",
     "parentid": "0",
-    "path": "/certificaty/personal"
+    "path": "/auth/personal"
   },
   {
     "id": "0101",
