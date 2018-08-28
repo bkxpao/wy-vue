@@ -44,7 +44,6 @@
                 let tmp = [];
                 let menu_all = this.menu_all;
                 let menu_tmp = JSON.parse(sessionStorage.getItem('functions'));
-                console.log(menu_tmp)
                 for (let i=0; i< menu_all.length; i++) {
                     for (let j=0;j< menu_tmp.length; j++) {
                         if (this.menu_all[i].id == menu_tmp[j]) {
