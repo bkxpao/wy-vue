@@ -95,15 +95,16 @@
                         // 登录作为参数的用户信息
                         let LoginParams = {
                             username: this.LoginForm.username,
-                            password: this.LoginForm.password
+                            password: this.$md5(this.LoginForm.password)
                         }
                         // 调用axios登录接口
-                        axios.get('/api/login',{params:LoginParams}).then(res => {
+                        this.$axios.post('/api/bmbucmm1/0010010.do',this.$qs.stringify(LoginParams)).then(res => {
                             this.logining = false
                             // 根据返回的code判断是否成功
-                            let {state, msg, username, token, funcs} = res.data
-                            console.log(LoginParams,res.data)
-                            if (state !== '00000') {
+                            console.log(res.data)
+                            let {msg, username, token, func} = res.data
+                            console.log(res.data.gda.msg_cd)
+                            if (res.data.gda.msg_cd !== 'MBU00000') {
                                 this.$message({
                                     type: 'error',
                                     message: msg
@@ -117,7 +118,7 @@
                                 console.log(JSON.stringify(username))
                                 sessionStorage.setItem('username', username)
                                 sessionStorage.setItem('token', token)
-                                sessionStorage.setItem('functions', JSON.stringify(funcs))
+                                sessionStorage.setItem('functions', JSON.stringify(func))
                                 // 跳转到我的信息的页面
                                 this.$router.push('/')
                             }

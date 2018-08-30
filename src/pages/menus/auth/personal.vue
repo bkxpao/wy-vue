@@ -18,18 +18,18 @@
                 label-width="120px">
             <my-dialog class="personal-form-dialog" :is-show="isShowBaseInfoDialog" @on-close="closeDialog('isShowBaseInfoDialog')">
                 <h3>资料填写</h3>
-                <el-form-item label="姓名" prop="password">
+                <el-form-item label="姓名" prop="name">
                     <el-input
                             type="text"
-                            v-model="AuthForm.password"
-                            placeholder="密码">
+                            v-model="AuthForm.name"
+                            placeholder="请输入姓名">
                     </el-input>
                 </el-form-item>
-                <el-form-item label="身份证号" prop="password">
+                <el-form-item label="身份证号" prop="user_no">
                     <el-input
                             type="text"
-                            v-model="AuthForm.password"
-                            placeholder="密码">
+                            v-model="AuthForm.user_no"
+                            placeholder="请输入身份证号">
                     </el-input>
                 </el-form-item>
                 <el-row>
@@ -42,7 +42,7 @@
                                     :on-change='changeUploadPic1'
                                     :show-file-list='false'
                             >
-                                <img v-if="Pic1" :src="Pic1" class="avatar">
+                                <img v-if="AuthForm.Pic1.url" :src="AuthForm.Pic1.url" class="avatar">
                                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                             </el-upload>
                         </el-form-item>
@@ -55,18 +55,18 @@
                                     :auto-upload='false'
                                     :on-change='changeUploadPic2'
                                     :show-file-list='false'>
-                                <img v-if="Pic2" :src="Pic2" class="avatar">
+                                <img v-if="AuthForm.Pic2.url" :src="AuthForm.Pic2.url" class="avatar">
                                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                             </el-upload>
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <l-form-item>
+                <el-form-item>
                     <el-button
                             type="primary"
                             class="nextBtn"
                             round
-                            @click.native="closeDialog('isShowBaseInfoDialog')"
+                            @click.native="submit()"
                     >
                         提交
                     </el-button>
@@ -78,7 +78,7 @@
                     >
                         返回
                     </el-button>
-                </l-form-item>
+                </el-form-item>
             </my-dialog>
         </el-form>
     </div>
@@ -86,19 +86,32 @@
 
 <script>
     import MyDialog from '../../../components/base/dialog'
+    import img2base64 from '../../../utils/img2base64'
     export default {
         data() {
             return {
                 isShowBaseInfoDialog: false,
-                Pic1: '',
-                Pic2: '',
                 AuthForm: {
-                    tel: '',
-                    hi: ''
+                    name: '',
+                    user_no: '',
+                    Pic1: '',
+                    Pic2: '',
                 }
             }
         },
         methods: {
+            submit() {
+                // 登录作为参数的用户信息
+                let AuthParams = {
+                    name: this.AuthForm.name,
+                    card_no: this.AuthForm.user_no,
+                    card_pic_a: img2base64(this.AuthForm.Pic1.url),
+                    card_pic_b: img2base64(this.AuthForm.Pic2.url)
+                }
+                console.log(AuthParams.card_pic_a)
+                // 调用axios登录接口
+                        this.$axios.post('/api/bmbucmm1/0010040.do',this.$qs.stringify(AuthParams)).then(res => {})
+            },
             nextDialog(now, next) {
                 this[now] = false
                 this[next] = true
@@ -112,15 +125,13 @@
             changeUploadPic1(file) {
                 this.$nextTick(
                     () => {
-                        this.Pic1 = file.url
-                        console.log(file)
+                        this.AuthForm.Pic1 = file
                     });
             },
             changeUploadPic2(file) {
                 this.$nextTick(
                     () => {
-                        this.Pic2 = file.url
-                        console.log(file)
+                        this.AuthForm.Pic2 = file
                     });
             }
         },

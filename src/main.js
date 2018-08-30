@@ -5,9 +5,15 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import qs from 'qs'
+import md5 from 'js-md5'
 
 Vue.use(ElementUI)
-Vue.prototype.$http = axios
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+Vue.prototype.$axios = axios
+Vue.prototype.$qs = qs
+Vue.prototype.$md5 = md5
+
 
 new Vue({
   el: '#app',

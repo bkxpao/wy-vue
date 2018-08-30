@@ -58,7 +58,7 @@
                         class="submitBtn"
                         round
                         @click.native.prevent="submit"
-                        :loading="logining">
+                        :loading="regining">
                     注册
                 </el-button>
                 <el-button
@@ -71,7 +71,6 @@
                 <hr>
                 <p>已经有账号，马上去<span class="to" @click="tologin">登录</span></p>
             </el-form-item>
-
         </el-form>
     </el-main>
 </template>
@@ -89,19 +88,17 @@
                 }
             }
             let telCheck = (rule, value, callback) => {
-                let reg=11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/
+                let reg=11 && /^((13|14|15|17|18|19)[0-9]{1}\d{8})$/
                 if (value === '') {
                     return callback(new Error('电话号码是必须的'))
                 } else if (!reg.test(value)) {
                     return callback(new Error('手机格式不正确'))
                 } else{
-                    axios.get('/api/login',{params:this.ReginForm.tel}).then(res => {
-                        let {state} = res.data
-                        if (state === '00000') {
-                            return callback(new Error('手机号已注册'))
-                        } else {
-                            callback()
+                    this.$axios.get('/api/bmbucmm1/0010030.do',{params:{tel:this.ReginForm.tel}}).then(res => {
+                        if (res.data.gda.msg_cd !== 'MBU00000') {
+                           return callback(new Error('手机号已被注册'))
                         }
+                        return callback()
                     })
                 }
             }
@@ -115,7 +112,7 @@
                     telcode: '',
                     regincode: ''
                 },
-                logining: false,
+                regining: false,
                 rule: {
                     tel: [
                         {
@@ -155,9 +152,32 @@
             submit () {
                 this.$refs.ReginForm.validate(valid => {
                     if (valid) {
-                        this.logining = true
-                        console.log('开始写入后台数据！')
-                        console.log(this.$refs.ReginForm)
+                        this.regining = true
+                         // 登录作为参数的用户信息
+                        let ReginParams = {
+                            tel: this.ReginForm.tel,
+                            password: this.$md5(this.ReginForm.password)
+                        }
+                        this.$axios.post('/api/bmbucmm1/0010020.do',this.$qs.stringify(ReginParams)).then(res => {                        
+                            let {msg_cd,msg_dat} = res.data.gda
+                            console.log(res.data)
+                            console.log(msg_cd,msg_dat)
+                        if (msg_cd !== 'MBU00000') {
+                            this.logining = false
+                            this.$message({
+                                    type: 'error',
+                                    message: msg_dat
+                                })
+                        } else {
+                            this.reset()
+                            this.$message({
+                                type: 'success',
+                                message: '注册成功,请前往登陆页面登陆'
+                            })
+                        }
+
+ 
+                    })
                     } else {
                         console.log('submit err')
                     }
