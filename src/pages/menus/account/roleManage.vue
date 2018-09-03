@@ -1,13 +1,15 @@
 <template>
     <div>
         <div class="role-manage-left">
-        <el-form :inline="true" :model="query" class="query-form" size="mini">
+        <el-form :inline="true"  class="query-form" size="mini">
             <el-form-item>
+            
+
                 <el-button-group>
-                    <el-button type="primary" icon="edit" @click="onSubmit">修改</el-button>
-                    <el-button type="primary" @click.native="handleForm(null,null)">添加</el-button>
-                    <el-button type="primary" @click.native="handleForm(null,null)">删除</el-button>
-                    <el-button type="primary" @click.native="handleForm(null,null)">保存权限</el-button>
+                    <el-button type="primary" icon="edit" @click.native="editRole()">修改</el-button>
+                    <el-button type="primary" @click="dialogAddFormVisible = true">添加</el-button>
+                    <el-button type="primary" @click.native="deleteRole()">删除</el-button>
+                    <el-button type="primary" @click.native="saveAuth()">保存权限</el-button>
                 </el-button-group>
             </el-form-item>
         </el-form>
@@ -22,12 +24,12 @@
                     width="50">
             </el-table-column>
             <el-table-column
-                    property="date"
+                    property="role_nm"
                     label="角色名称"
                     >
             </el-table-column>
             <el-table-column
-                    property="name"
+                    property="role_desc"
                     label="备注"
                    >
             </el-table-column>
@@ -35,7 +37,7 @@
         </div>
         <div class="role-manage-right">
         <el-tree
-                :data="data2"
+                :data="authList"
                 show-checkbox
                 default-expand-all
                 node-key="id"
@@ -44,6 +46,34 @@
                 :props="defaultProps">
         </el-tree>
         </div>
+        <el-dialog title="增加角色" :visible.sync="dialogAddFormVisible">
+          <el-form :model="addRoleForm">
+            <el-form-item label="角色名称" :label-width="formLabelWidth">
+              <el-input v-model="addRoleForm.name"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="addRoleForm.desc" type="textarea"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogAddFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addRoleSubmit()">确 定</el-button>
+          </div>
+        </el-dialog>
+        <el-dialog title="修改角色" :visible.sync="dialogEditFormVisible">
+          <el-form :model="editRoleForm">
+            <el-form-item label="角色名称" :label-width="formLabelWidth">
+              <el-input v-model="editRoleForm.name" value="this.currentRow.role_nm"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="editRoleForm.desc" type="textarea"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogEditFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="editRoleSubmit()">确 定</el-button>
+          </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -51,26 +81,36 @@
     export default {
         data() {
             return {
-                data2: [],
+                dialogAddFormVisible: false,
+                dialogEditFormVisible: false,
+                authList: [],
                 defaultProps: {
                     children: 'nodes',
                     label: 'name'
                 },
-                tableData: [
-                    {
-                    date: '超级管理员',
-                    name: '超级管理员',
-                    },
-                    {
-                    date: '普通管理员',
-                    name: '普通管理员',
-                    }
-                ]
+                tableData: [],
+                currentRow: null,
+                addRoleForm: {
+                    name: '',
+                    desc: ''
+                },
+                editRoleForm:  {
+                    id: '',
+                    name: '',
+                    desc: ''
+                },
+                formLabelWidth: '120px',
+                current_auths: [],
+                currentFuncNo: '010103'
             }
         },
         methods: {
             setCurrent(row) {
-                this.$refs.singleTable.setCurrentRow(row);
+                this.$refs.singleTable.setCurrentRow(row)
+                this.currentRow = row
+            },
+            getCurrent() {
+                return this.$refs.singleTable.row;
             },
             handleCurrentChange(val) {
                 this.currentRow = val;
@@ -96,10 +136,125 @@
                 }
                 JSON.stringify(itemArr)
                 return itemArr
+            },
+            editRole() {
+                if (this.currentRow) {
+                    this.dialogEditFormVisible = true
+                    this.editRoleForm.id = this.currentRow.role_id
+                    this.editRoleForm.name = this.currentRow.role_nm
+                    this.editRoleForm.desc = this.currentRow.role_desc
+                } else {
+                    this.$message({
+                            type: 'error',
+                            message: '当前没有选中行'
+                        })
+                }
+            },
+            deleteRole() {
+                if (this.currentRow) {
+                     this.$confirm('是否移除当前角色?', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                    }).then(() => {
+                      let params = {
+                        method: 3,
+                        role_id: this.currentRow.role_id,
+                        func_no: this.currentFuncNo
+                     }
+                    this.update(params)
+                    }).catch(() => {
+                      this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                      });          
+                    });
+                }else {
+                    this.$message({
+                        type: 'error',
+                        message: '当前没有选中行'
+                    })
+                }
+            },
+            addRoleSubmit() {
+                let params = {
+                    method: 1,
+                    role_nm: this.addRoleForm.name,
+                    role_desc: this.addRoleForm.desc,
+                    func_no: this.currentFuncNo
+                }
+               this.update(params)
+               this.dialogAddFormVisible= false
+            },
+            editRoleSubmit() {
+                let params = {
+                    method: 2,
+                    role_id: this.editRoleForm.id,
+                    role_nm: this.editRoleForm.name,
+                    role_desc: this.editRoleForm.desc,
+                    func_no: this.currentFuncNo
+                }
+               this.update(params)
+               this.dialogEditFormVisible= false
+            },
+            saveAuth() {
+                let auths = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())
+                let auths_str = ''
+                 for ( var i = 0; i <auths.length; i++){
+                    auths_str += auths[i]+'|'
+                }
+                let params = {
+                    role_id: this.currentRow.role_id,
+                    auth_lst: auths_str,
+                    func_no: this.currentFuncNo
+                }
+                this.$axios.post('/mrbui/bmbucmm1/0010110.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.query()
+                    }
+                 })
+                this.$message({
+                    type: 'success',
+                    message: '保存成功'
+                })
+            },
+            update(params) {
+                this.$axios.post('/mrbui/bmbucmm1/0010100.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.query()
+                    }
+                 })
+            },
+            query() {
+                let params = {
+                    func_no: this.currentFuncNo
+                }
+                this.$axios.post('/mrbui/bmbucmm1/0010090.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.tableData = res.data.role_lst
+                        console.log(this.tableData)
+                    }
+                 })
             }
         },
         mounted() {
-            this.data2 = this.getMenuTree(require('../../../data/menu'), "0")
+            this.authList = this.getMenuTree(require('../../../data/menu'), "0")
+            this.query()
         }
 
     }

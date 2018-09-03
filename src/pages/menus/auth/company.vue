@@ -1,6 +1,7 @@
 <template>
     <div>
-    <el-form
+        <div v-if="companyStatus=0">
+        <el-form
             :model="AuthForm"
             ref="AuthForm"
             class="authform"
@@ -10,70 +11,70 @@
             type="success"
             class="verifiedBtn"
             round
-            @click.native="startDialog('isShowBaseInfoDialog')">
+            @click.native="start()">
             <h1>开始认证</h1>
         </el-button>
         </div>
-        <my-dialog class="company-form-dialog" :is-show="isShowBaseInfoDialog" @on-close="closeDialog('isShowBaseInfoDialog')">
-        <el-steps :active="0" align-center>
-            <el-step title="企业基本信息"></el-step>
-            <el-step title="法人信息"></el-step>
-            <el-step title="营业执照信息"></el-step>
-            <el-step title="负责人信息"></el-step>
-            <el-step title="结算信息"></el-step>
-        </el-steps>
-        <h3>企业基本信息</h3>
-
-        <el-form-item label="企业名称" prop="password">
+        <el-dialog
+          title="企业认证"
+          :visible.sync="isShowDialog"
+          width="70%"
+          >
+        <div v-if="isShowBaseInfoDialog">
+            <el-steps :active="0" align-center>
+                <el-step title="企业基本信息"></el-step>
+                <el-step title="法人信息"></el-step>
+                <el-step title="营业执照信息"></el-step>
+                <el-step title="负责人信息"></el-step>
+                <el-step title="结算信息"></el-step>
+            </el-steps>
+        <el-form-item label="企业名称" prop="companyName">
         <el-input
         type="text"
-        v-model="AuthForm.password"
-        placeholder="密码">
+        v-model="AuthForm.companyName"
+        placeholder="请输入企业名称">
         </el-input>
         </el-form-item>
-        <el-form-item label="企业简称" prop="password">
+        <el-form-item label="企业简称" prop="companyShortName">
             <el-input
             type="text"
-            v-model="AuthForm.password"
-            placeholder="密码">
+            v-model="AuthForm.companyShortName"
+            placeholder="请输入企业简称">
             </el-input>
         </el-form-item>
-        <el-form-item label="企业类型" prop="password">
-            <el-select v-model="value" placeholder="请选择">
+        <el-form-item label="企业类型" prop="companyType">
+            <el-select v-model="AuthForm.companyType" placeholder="请选择">
             <el-option
-            v-for="item in options"
+            v-for="item in companyTypes"
             :key="item.value"
             :label="item.label"
             :value="item.value">
             </el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="所在地区" prop="password">
-        <el-cascader
-        :options="area"
-        @active-item-change="handleItemChange"
-        :props="props"
-        ></el-cascader>
+        <el-form-item label="地区">
+          <v-distpicker :province="AuthForm.province" :city="AuthForm.city" :area="AuthForm.dist" @province="onChangeProvince" @city="onChangeCity" @area="onChangeArea" >
+          </v-distpicker>
         </el-form-item>
-        <el-form-item label="营业地址" >
+        <el-form-item label="营业地址" prop="companyAddress">
         <el-input
         type="textarea"
-        v-model="AuthForm.password"
-        placeholder="密码">
+        v-model="AuthForm.companyAddress"
+        placeholder="请输入营业地址">
         </el-input>
         </el-form-item>
-        <el-form-item>
-            <el-button
-                    type="primary"
-                    class="nextBtn"
-                    round
-                    @click.native="nextDialog('isShowBaseInfoDialog','isShowLegalInfoDialog')"
-            >
-                下一步
-            </el-button>
-        </el-form-item>
-    </my-dialog>
-    <my-dialog class="company-form-dialog" :is-show="isShowLegalInfoDialog" @on-close="closeDialog('isShowLegalInfoDialog')">
+        <span slot="footer" class="dialog-footer">
+        <el-button
+                type="primary"
+                round
+                @click.native="nextDialog('isShowBaseInfoDialog','isShowLegalInfoDialog')"
+        >
+            下一步
+        </el-button>
+    </span>
+    </div>
+
+    <div v-else-if="isShowLegalInfoDialog">
         <el-steps :active="1" align-center>
             <el-step title="企业基本信息"></el-step>
             <el-step title="法人信息"></el-step>
@@ -81,20 +82,18 @@
             <el-step title="负责人信息"></el-step>
             <el-step title="结算信息"></el-step>
         </el-steps>
-        <h3>法人信息</h3>
-
-        <el-form-item label="法人名称" prop="password">
+        <el-form-item label="法人姓名" prop="legalName">
         <el-input
         type="text"
-        v-model="AuthForm.password"
-        placeholder="密码">
+        v-model="AuthForm.legalName"
+        placeholder="请输入法人姓名">
         </el-input>
         </el-form-item>
-        <el-form-item label="法人身份证号" prop="password">
+        <el-form-item label="法人身份证号" prop="legalCardNo">
         <el-input
         type="text"
-        v-model="AuthForm.password"
-        placeholder="密码">
+        v-model="AuthForm.legalCardNo"
+        placeholder="请输入法人身份证号">
         </el-input>
         </el-form-item>
         <el-row>
@@ -107,7 +106,7 @@
                 :on-change='changeUploadLegalPic1'
                 :show-file-list='false'
                 >
-            <img v-if="LegalPic1" :src="LegalPic1" class="avatar">
+            <img v-if="AuthForm.legalCardPicA" :src="AuthForm.legalCardPicA.url" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
         </el-form-item>
@@ -120,33 +119,30 @@
                 :auto-upload='false'
                 :on-change='changeUploadLegalPic2'
                 :show-file-list='false'>
-            <img v-if="LegalPic2" :src="LegalPic2" class="avatar">
+            <img v-if="AuthForm.legalCardPicB" :src="AuthForm.legalCardPicB.url" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
         </el-form-item>
             </el-col>
         </el-row>
-
-        <el-form-item>
+        <span slot="footer" class="dialog-footer">
             <el-button
                     type="primary"
-                    class="nextBtn"
-                    round
-                    @click.native="nextDialog('isShowLegalInfoDialog','isShowLicenseInfoDialog')"
-            >
-                下一步
-            </el-button>
-            <el-button
-                    type="primary"
-                    class="nextBtn"
                     round
                     @click.native="nextDialog('isShowLegalInfoDialog','isShowBaseInfoDialog')"
             >
                 上一步
             </el-button>
-        </el-form-item>
-    </my-dialog>
-    <my-dialog class="company-form-dialog" :is-show="isShowLicenseInfoDialog" @on-close="closeDialog('isShowLicenseInfoDialog')">
+            <el-button
+                    type="primary"
+                    round
+                    @click.native="nextDialog('isShowLegalInfoDialog','isShowLicenseInfoDialog')"
+            >
+                下一步
+            </el-button>
+        </span>
+   </div>
+   <div v-else-if="isShowLicenseInfoDialog">
         <el-steps :active="2" align-center>
             <el-step title="企业基本信息"></el-step>
             <el-step title="法人信息"></el-step>
@@ -154,27 +150,25 @@
             <el-step title="负责人信息"></el-step>
             <el-step title="结算信息"></el-step>
         </el-steps>
-        <h3>营业执照信息</h3>
-
-        <el-form-item label="营业执照名称" prop="password">
+        <el-form-item label="营业执照名称" prop="companyCertName">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.companyCertName"
+                    placeholder="请输入营业执照名称">
             </el-input>
         </el-form-item>
-        <el-form-item label="营业执照号码" prop="password">
+        <el-form-item label="营业执照号码" prop="companyCertNo">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.companyCertNo"
+                    placeholder="请输入营业执照号码">
             </el-input>
         </el-form-item>
-        <el-form-item label="营业执照地址" prop="password">
+        <el-form-item label="营业执照地址" prop="companyCertAddress">
             <el-input
                     type="textarea"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.companyCertAddress"
+                    placeholder="请输入营业执照地址">
             </el-input>
         </el-form-item>
         <el-form-item label="营业执照照片">
@@ -183,30 +177,28 @@
                     :auto-upload='false'
                     :on-change='changeUploadCompanyPic'
                     :show-file-list='false'>
-                <img v-if="CompanyPic" :src="CompanyPic" class="avatar">
+                <img v-if="AuthForm.companyCertPic" :src="AuthForm.companyCertPic.url" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
         </el-form-item>
-        <el-form-item>
+        <span slot="footer" class="dialog-footer">
             <el-button
                     type="primary"
-                    class="nextBtn"
-                    round
-                    @click.native="nextDialog('isShowLicenseInfoDialog','isShowMasterInfoDialog')"
-            >
-                下一步
-            </el-button>
-            <el-button
-                    type="primary"
-                    class="nextBtn"
                     round
                     @click.native="nextDialog('isShowLicenseInfoDialog','isShowLegalInfoDialog')"
             >
                 上一步
             </el-button>
-        </el-form-item>
-    </my-dialog>
-    <my-dialog class="company-form-dialog" :is-show="isShowMasterInfoDialog" @on-close="closeDialog('isShowMasterInfoDialog')">
+            <el-button
+                    type="primary"
+                    round
+                    @click.native="nextDialog('isShowLicenseInfoDialog','isShowMasterInfoDialog')"
+            >
+                下一步
+            </el-button>
+        </span>
+    </div>
+    <div v-else-if="isShowMasterInfoDialog">
         <el-steps :active="3" align-center>
             <el-step title="企业基本信息"></el-step>
             <el-step title="法人信息"></el-step>
@@ -214,20 +206,25 @@
             <el-step title="负责人信息"></el-step>
             <el-step title="结算信息"></el-step>
         </el-steps>
-        <h3>负责人信息</h3>
-
-        <el-form-item label="负责人名称" prop="password">
+        <el-form-item label="负责人名称" prop="masterName">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.masterName"
+                    placeholder="请输入负责人姓名">
             </el-input>
         </el-form-item>
-        <el-form-item label="负责人身份证号" prop="password">
+        <el-form-item label="负责人手机号" prop="masterMobileNo">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.masterMobileNo"
+                    placeholder="请输入负责人手机号">
+            </el-input>
+        </el-form-item>
+        <el-form-item label="负责人身份证号" prop="masterCardNo">
+            <el-input
+                    type="text"
+                    v-model="AuthForm.masterCardNo"
+                    placeholder="请输入负责人身份照号码">
             </el-input>
         </el-form-item>
         <el-row>
@@ -240,7 +237,7 @@
                             :on-change='changeUploadMasterPic1'
                             :show-file-list='false'
                     >
-                        <img v-if="MasterPic1" :src="MasterPic1" class="avatar">
+                        <img v-if="AuthForm.masterCardPicA" :src="AuthForm.masterCardPicA.url" class="avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
@@ -253,32 +250,30 @@
                             :auto-upload='false'
                             :on-change='changeUploadMasterPic2'
                             :show-file-list='false'>
-                        <img v-if="MasterPic2" :src="MasterPic2" class="avatar">
+                        <img v-if="AuthForm.masterCardPicB" :src="AuthForm.masterCardPicB.url" class="avatar">
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
             </el-col>
         </el-row>
-        <l-form-item>
+        <span slot="footer" class="dialog-footer">
             <el-button
                     type="primary"
-                    class="nextBtn"
-                    round
-                    @click.native="nextDialog('isShowMasterInfoDialog','isShowCardInfoDialog')"
-            >
-                下一步
-            </el-button>
-            <el-button
-                    type="primary"
-                    class="nextBtn"
                     round
                     @click.native="nextDialog('isShowMasterInfoDialog','isShowLicenseInfoDialog')"
             >
                 上一步
             </el-button>
-        </l-form-item>
-    </my-dialog>
-    <my-dialog class="company-form-dialog" :is-show="isShowCardInfoDialog" @on-close="closeDialog('isShowCardInfoDialog')">
+            <el-button
+                    type="primary"
+                    round
+                    @click.native="nextDialog('isShowMasterInfoDialog','isShowCardInfoDialog')"
+            >
+                下一步
+            </el-button>
+        </span>
+    </div>
+    <div v-else-if="isShowCardInfoDialog">
         <el-steps :active="4" align-center>
             <el-step title="企业基本信息"></el-step>
             <el-step title="法人信息"></el-step>
@@ -286,176 +281,179 @@
             <el-step title="负责人信息"></el-step>
             <el-step title="结算信息"></el-step>
         </el-steps>
-        <h3>结算信息</h3>
-
-        <el-form-item label="结算卡号" prop="password">
+        <el-form-item label="结算卡号" prop="bankCardNo">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.bankCardNo"
+                    placeholder="请输入结算卡号">
             </el-input>
         </el-form-item>
-        <el-form-item label="所在银行" prop="password">
-            <el-select v-model="value" placeholder="请选择">
+        <el-form-item label="所在银行" prop="bank">
+            <el-select v-model="AuthForm.bank" placeholder="请选择">
                 <el-option
-                        v-for="item in options"
+                        v-for="item in bankList"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value">
                 </el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="结算账户户名" prop="password">
+        <el-form-item label="结算账户户名" prop="bankCardName">
             <el-input
                     type="text"
-                    v-model="AuthForm.password"
-                    placeholder="密码">
+                    v-model="AuthForm.bankCardName"
+                    placeholder="请输入结算账户名称">
             </el-input>
         </el-form-item>
-
-        <el-form-item>
+        <span slot="footer" class="dialog-footer">
             <el-button
                     type="primary"
-                    class="nextBtn"
-                    round
-                    @click.native="closeDialog('isShowCardInfoDialog')"
-            >
-                完成
-            </el-button>
-            <el-button
-                    type="primary"
-                    class="nextBtn"
                     round
                     @click.native="nextDialog('isShowCardInfoDialog','isShowMasterInfoDialog')"
             >
                 上一步
             </el-button>
-        </el-form-item>
-    </my-dialog>
-    </el-form>
+            <el-button
+                    type="primary"
+                    round
+                    @click.native="submit()"
+            >
+                完成
+            </el-button>
+        </span>
+    </div>
+       
+    </el-dialog>
+ </el-form>
+</div>
+<div v-else-if="companyStatus=1">
+   <span style="padding: 50px;"> 您的企业正在审核中..请耐心等待..</span>
+</div>
+<div v-else-if="companyStatus=2">
+    <span style="padding: 50px;"> 认证成功</span>
+</div>
+
 </div>
 </template>
 <script>
-import axios from 'axios'
-import MyDialog from '../../../components/base/dialog'
+import img2base64 from '../../../utils/img2base64'
+import VDistpicker from 'v-distpicker'
 export default {
-    components: {
-        MyDialog
-    },
+    components: { VDistpicker },
     data () {
         return {
-            LegalPic1: '',
-            LegalPic2: '',
-            CompanyPic: '',
-            MasterPic1: '',
-            MasterPic2: '',
+            companyStatus: '',
             fileList: [],
+            isShowDialog: false,
             isShowBaseInfoDialog : false,
             isShowLegalInfoDialog : false,
             isShowLicenseInfoDialog : false,
             isShowMasterInfoDialog : false,
             isShowCardInfoDialog: false,
-            Imgthing: {}, //子组件上传的信息
             AuthForm: {
-                tel: '',
-                password: '',
-                confirmpassword: '',
-                telcode: '',
-                regincode: '',
-                identityCard_Z: '',
-                identityCard_F: '',
-                identityCard_S: ''
+                companyName: '',
+                companyShortName: '',
+                companyArea: '',
+                companyAddress: '',
+                companyType: '',
+                legalName: '',
+                legalCardNo: '',
+                legalCardPicA: '',
+                legalCardPicB: '',
+                companyCertName: '',
+                companyCertNo: '',
+                companyCertPic: '',
+                companyCertAddress: '',
+                masterName: '',
+                masterCardNo: '',
+                masterMobileNo: '',
+                masterCardPicA: '',
+                masterCardPicB: '',
+                bankCardNo: '',
+                bank: '',
+                bankCardName: '',
+                province: '',
+                city: '',
+                dist: ''
             },
-            area: [{
-                label: '江苏',
-                cities: []
+            companyTypes: [{
+                value: '1',
+                label: '核心企业'
             }, {
-                label: '浙江',
-                cities: []
+                value: '2',
+                label: '供应商'
+            }, {
+                value: '3',
+                label: '银行'
             }],
-            props: {
-                value: 'label',
-                children: 'cities'
-            },
-            options: [{
-                value: '选项1',
-                label: '黄金糕'
-            }, {
-                value: '选项2',
-                label: '双皮奶'
-            }, {
-                value: '选项3',
-                label: '蚵仔煎'
-            }, {
-                value: '选项4',
-                label: '龙须面'
-            }, {
-                value: '选项5',
-                label: '北京烤鸭'
+            bankList: [{
+                value: '1',
+                label: '招商银行'
+            },{
+                value: '2',
+                label: '交通银行'
             }],
-            value: '',
-            imageUrl: ''
+            value: ''
         }
     },
     methods: {
-        // ...
-        submit() {
-            this.$refs.AuthForm.validate(valid => {
-                if (valid) {
-                    this.logining = true
-                    console.log('开始写入后台数据！')
-                    console.log(this.$refs.AuthForm)
-                } else {
-                    console.log('submit err')
-                }
-            })
+        onChangeProvince(data) {
+          this.AuthForm.province = data.value
         },
+        onChangeCity(data) {
+          this.AuthForm.city = data.value
+        },
+        onChangeArea(data) {
+          this.AuthForm.area = data.value
+        },
+        start() {
+            this.isShowDialog = true,
+            this.isShowBaseInfoDialog = true
+        },
+        handleClose() {
+            this.isShowBaseInfoDialog = false
+        },
+        // ...
+       submit() {
+                // 登录作为参数的用户信息
+                let AuthParams = {
+                    company_nm: this.AuthForm.companyName,
+                    company_snm: this.AuthForm.companyShortName,
+                    company_area: this.AuthForm.area,
+                    company_province: this.AuthForm.province,
+                    company_city: this.AuthForm.city,
+                    company_addr: this.AuthForm.companyAddress,
+                    company_typ: this.AuthForm.companyType,
+                    legal_nm: this.AuthForm.legalName,
+                    legal_cd: this.AuthForm.legalCardNo,
+                    legal_card_pic_a: img2base64(this.AuthForm.legalCardPicA.url),
+                    legal_card_pic_b: img2base64(this.AuthForm.legalCardPicB.url),
+                    business_name: this.AuthForm.companyCertName,
+                    business_license: this.AuthForm.companyCertNo,
+                    company_cert_pic: img2base64(this.AuthForm.companyCertPic.url),
+                    business_address: this.AuthForm.companyCertAddress,
+                    connect_nm: this.AuthForm.masterName,
+                    connect_cd: this.AuthForm.masterCardNo,
+                    connect_mbl: this.AuthForm.masterMobileNo,
+                    connect_card_pic_a: img2base64(this.AuthForm.masterCardPicA.url),
+                    connect_card_pic_b: img2base64(this.AuthForm.masterCardPicB.url),
+                    card_no: this.AuthForm.bankCardNo,
+                    bank: this.AuthForm.bank,
+                    card_nm: this.AuthForm.bankCardName
+                }
+                console.log(AuthParams)
+                // // 调用axios登录接口
+                this.$axios.post('/mrbui/bmbucmm1/0010150.do',this.$qs.stringify(AuthParams)).then(res => {
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    }
+                })
+            },
         reset() {
             this.$refs.AuthForm.resetFields()
-        },
-        tologin() {
-            this.$router.push('/login')
-        },
-        //验证手机号码部分
-        sendcode() {
-            var reg = 11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
-            console.log(this.AuthForm.tel)
-            //var url="/nptOfficialWebsite/apply/sendSms?mobile="+this.AuthForm.phone;
-            if (this.AuthForm.tel == '' || !reg.test(this.AuthForm.tel)) {
-            } else {
-                this.time = 60;
-                this.getCode = true;
-                this.timer();
-                /*axios.post(url).then(
-                    res=>{
-                    this.phonedata=res.data;
-                })*/
-            }
-        },
-        timer() {
-            if (this.time > 0) {
-                this.time--;
-                this.btntxt = this.time + "s后重新获取";
-                setTimeout(this.timer, 1000);
-            } else {
-                this.time = 0;
-                this.btntxt = "获取验证码";
-                this.getCode = false;
-            }
-        },
-        handleItemChange(val) {
-            console.log('active item:', val);
-            setTimeout(_ => {
-                if (val.indexOf('江苏') > -1 && !this.options2[0].cities.length) {
-                    this.options2[0].cities = [{
-                        label: '南京'
-                    }];
-                } else if (val.indexOf('浙江') > -1 && !this.options2[1].cities.length) {
-                    this.options2[1].cities = [{
-                        label: '杭州'
-                    }];
-                }
-            }, 300);
         },
         nextDialog(now, next) {
             this[now] = false
@@ -470,38 +468,48 @@ export default {
         changeUploadLegalPic1(file) {
             this.$nextTick(
                 () => {
-                    this.LegalPic1 = file.url
-                    console.log(file)
+                    this.AuthForm.legalCardPicA = file
                 });
         },
         changeUploadLegalPic2(file) {
             this.$nextTick(
                 () => {
-                    this.LegalPic2 = file.url
-                    console.log(file)
+                    this.AuthForm.legalCardPicB = file
                 });
         },
         changeUploadCompanyPic(file) {
             this.$nextTick(
                 () => {
-                    this.CompanyPic = file.url
-                    console.log(file)
+                    this.AuthForm.companyCertPic = file
                 });
         },
         changeUploadMasterPic1(file) {
             this.$nextTick(
                 () => {
-                    this.MasterPic1 = file.url
-                    console.log(file)
+                    this.AuthForm.masterCardPicA = file
                 });
         },
         changeUploadMasterPic2(file) {
             this.$nextTick(
                 () => {
-                    this.MasterPic2 = file.url
-                    console.log(file)
+                    this.AuthForm.masterCardPicB = file
                 });
+        },
+        query() {
+            this.$axios.get('/mrbui/bmbucmm1/0010160.do').then(res => {
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.companyStatus = res.data.company_sts
+                    }
+                })
         }
+    },
+    mounted() {
+        this.query()
     }
 }
 </script>
@@ -531,36 +539,7 @@ h3{
     float: right;
     margin-left: 10px;
 }
-.avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-}
-.avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 320px;
-    height: 200px;
-    border: 1px dashed #d9d9d9;
-    border-radius:10px;
 
-    line-height: 178px;
-    text-align: center;
-}
-.el-icon-plus avatar-uploader-icon{
-    height: 10px;
-}
-.avatar {
-    width: 322px;
-    height: 202px;
-    border-radius: 6px;
-    display: block;
-}
 .verifiedBtn {
     width: 300px;
     height: 100px;
@@ -568,6 +547,4 @@ h3{
     position: absolute;top:25%;left: 50%;margin-left: -150px;
 
 }
-
-
 </style>

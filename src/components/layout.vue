@@ -90,5 +90,34 @@
 
 
 <style>
+.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+}
+.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 320px;
+    height: 200px;
+    border: 1px dashed #d9d9d9;
+    border-radius:10px;
 
+    line-height: 178px;
+    text-align: center;
+}
+.el-icon-plus avatar-uploader-icon{
+    height: 10px;
+}
+.avatar {
+    width: 322px;
+    height: 202px;
+    border-radius: 6px;
+    display: block;
+}
 </style>

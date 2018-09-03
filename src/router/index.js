@@ -9,6 +9,7 @@ import PersonalAuth from '../pages/menus/auth/personal'
 import CompanyAuth from '../pages/menus/auth/company'
 import LoginPage from '../pages/login'
 import ReginPage from '../pages/regin'
+import IndexPage from '../pages/index'
 
 Vue.use(Router)
 
@@ -18,26 +19,36 @@ const router = new Router({
         {
             path: '/',
             name: 'index',
+            redirect: '/index',
             component: Layout,
             children: [
                 {
+                  path:'/index',
+                  name:'首页',
+                  component: IndexPage
+                },
+                {
                     path: '/account/staff',
                     name: '员工管理',
+                    index: '010102',
                     component: StaffManage
                 },
                 {
                     path: '/account/apply',
                     name: '员工申请',
+                    index: '010101',
                     component: StaffApply
                 },
                 {
                     path: '/account/role',
                     name: '角色管理',
+                    index: '010103',
                     component: RoleManage
                 },
                 {
                     path: '/account/auther',
                     name: '权限管理',
+                    index: '010104',
                     component: AutherManage
                 },
                 {

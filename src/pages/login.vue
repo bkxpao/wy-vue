@@ -98,16 +98,16 @@
                             password: this.$md5(this.LoginForm.password)
                         }
                         // 调用axios登录接口
-                        this.$axios.post('/api/bmbucmm1/0010010.do',this.$qs.stringify(LoginParams)).then(res => {
+                        this.$axios.post('/mrbui/bmbucmm1/0010010.do',this.$qs.stringify(LoginParams)).then(res => {
                             this.logining = false
                             // 根据返回的code判断是否成功
                             console.log(res.data)
-                            let {msg, username, token, func} = res.data
+                            let {gda, username, token_id, func, personal_sts, company_sts,company_no} = res.data
                             console.log(res.data.gda.msg_cd)
                             if (res.data.gda.msg_cd !== 'MBU00000') {
                                 this.$message({
                                     type: 'error',
-                                    message: msg
+                                    message: res.data.gda.msg_cd
                                 })
                             } else {
                                 this.$message({
@@ -117,8 +117,12 @@
                                 // 将返回的数据注入sessionStorage
                                 console.log(JSON.stringify(username))
                                 sessionStorage.setItem('username', username)
-                                sessionStorage.setItem('token', token)
+                                sessionStorage.setItem('token', token_id)
                                 sessionStorage.setItem('functions', JSON.stringify(func))
+                                sessionStorage.setItem('personal_sts',personal_sts)
+                                sessionStorage.setItem('company_sts',company_sts)
+                                sessionStorage.setItem('company_no',company_no)
+                                
                                 // 跳转到我的信息的页面
                                 this.$router.push('/')
                             }

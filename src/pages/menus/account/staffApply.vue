@@ -11,18 +11,18 @@
                     width="50">
             </el-table-column>
             <el-table-column
-                    property="date"
+                    property="change_tm"
                     label="日期"
+                    :formatter="dateFormat"
                     width="120">
             </el-table-column>
             <el-table-column
-                    property="name"
-                    label="姓名"
-                    width="120">
+                    property="oper_nm"
+                    label="姓名">
             </el-table-column>
-            <el-table-column
-                    property="address"
-                    label="地址">
+             <el-table-column
+                    property="mbl_no"
+                    label="手机号">
             </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
@@ -44,27 +44,19 @@
     export default {
         data() {
             return {
-                tableData: [{
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1517 弄'
-                }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1519 弄'
-                }, {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1516 弄'
-                }],
-                currentRow: null
+                tableData: [],
+                currentRow: null,
+                currentFuncNo: '010101'
             }
         },
         methods: {
+            dateFormat(row, column) {
+                var date = row[column.property];
+                 if (date == undefined) {
+                  return "";
+                 }
+                return (date).substring(0,date.length-6);
+            },
             setCurrent(row) {
                 this.$refs.singleTable.setCurrentRow(row);
             },
@@ -72,11 +64,53 @@
                 this.currentRow = val;
             },
             handleEdit(index, row) {
-                console.log(index, row);
+                let params = {
+                    status: '1',
+                    mbl_no: row.mbl_no,
+                    func_no: this.currentFuncNo
+                }
+               this.update(params)
             },
             handleDelete(index, row) {
-                console.log(index, row);
+                let params = {
+                    status: '2',
+                    mbl_no: row.mbl_no,
+                    func_no: this.currentFuncNo
+                }
+               this.update(params)
+            },
+            update(params) {
+                this.$axios.post('/mrbui/bmbucmm1/0010080.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.query()
+                    }
+                 })
+            },
+            query() {
+                let params = {
+                    status: '1',
+                    func_no: this.currentFuncNo
+                }
+                
+                this.$axios.post('/mrbui/bmbucmm1/0010070.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.tableData = res.data.staff_lst
+                    }
+                 })
             }
+        },
+        mounted() {
+             this.query()
         }
     }
 </script>

@@ -1,10 +1,10 @@
 <template>
     <div>
         <div class="auth-manage-left">
-            <el-form :inline="true" :model="query" class="query-form" size="mini">
+            <el-form :inline="true"  class="query-form" size="mini">
                 <el-form-item>
                     <el-button-group>
-                        <el-button type="primary" @click.native="handleForm(null,null)">保存权限</el-button>
+                        <el-button type="primary" @click.native="saveAuth()">保存权限</el-button>
                     </el-button-group>
                 </el-form-item>
             </el-form>
@@ -19,20 +19,19 @@
                         width="50">
                 </el-table-column>
                 <el-table-column
-                        property="date"
+                        property="oper_nm"
                         label="员工名称"
                 >
                 </el-table-column>
                 <el-table-column
-                        property="name"
+                        property="oper_role"
                         label="权限"
                 >
                 </el-table-column>
             </el-table>
         </div>
         <div class="auth-manage-right">
-            <el-transfer v-model="value1" :data="data"></el-transfer>
-
+            <el-transfer v-model="roleValue" :props="{key: 'role_id',label: 'role_nm'}" :data="roleList"></el-transfer>
         </div>
     </div>
 </template>
@@ -41,21 +40,15 @@
     export default {
         data() {
             return {
-                data2: [],
+                roleValue: [],
+                roleList: [],
                 defaultProps: {
                     children: 'nodes',
                     label: 'name'
                 },
-                tableData: [
-                    {
-                        date: '王小虎',
-                        name: '超级管理员',
-                    },
-                    {
-                        date: '王小虎',
-                        name: '普通管理员',
-                    }
-                ]
+                tableData: [],
+                currentRow: null,
+                currentFuncNo: '010104'
             }
         },
         methods: {
@@ -65,31 +58,64 @@
             handleCurrentChange(val) {
                 this.currentRow = val;
             },
-            handleEdit(index, row) {
-                console.log(index, row);
-            },
-            handleDelete(index, row) {
-                console.log(index, row);
-            },
-            getMenuTree(data, parentid) {
-                let itemArr = []
-                for (let i = 0; i < data.length; i++) {
-                    let node = data[i]
-                    if (node.parentid == parentid) {
-                        let newNode = {}
-                        newNode.id = node.id
-                        newNode.name = node.name
-                        newNode.path = node.path
-                        newNode.nodes = this.getMenuTree(data, node.id)
-                        itemArr.push(newNode)
-                    }
+            saveAuth() {
+                let roles = this.roleValue
+                let roles_str = ''
+                 for ( var i = 0; i <roles.length; i++){
+                    roles_str += roles[i]+'|'
                 }
-                JSON.stringify(itemArr)
-                return itemArr
+                let params = {
+                    roles_lst: roles_str,
+                    mbl_no: this.currentRow.mbl_no,
+                    func_no: this.currentFuncNo
+                }
+                this.$axios.post('/mrbui/bmbucmm1/0010120.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.query()
+                    }
+                 })
+                this.$message({
+                    type: 'success',
+                    message: '保存成功'
+                })
+            },
+            query() {
+                let params = {
+                    status: '3',
+                    func_no: this.currentFuncNo
+                }
+                this.$axios.post('/mrbui/bmbucmm1/0010070.do',this.$qs.stringify(params)).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.tableData = res.data.staff_lst
+                        console.log(this.tableData)
+                    }
+                 })
+                this.$axios.post('/mrbui/bmbucmm1/0010090.do',this.$qs.stringify(params),).then(res => { 
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        console.log(res.data.role_lst)
+                        this.roleList =  res.data.role_lst
+                    }
+                 })
+
             }
         },
         mounted() {
-            this.data2 = this.getMenuTree(require('../../../data/menu'), "0")
+            this.query()
         }
 
     }

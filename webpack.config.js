@@ -73,11 +73,11 @@ module.exports = (options = {}) => ({
     host: '127.0.0.1',
     port: 8010,
     proxy: {
-      '/api/': {
+      '/mrbui/': {
         target: 'http://hadoop001:8580/mrbui',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': ''
+          '^/mrbui': ''
         }
       }
     },

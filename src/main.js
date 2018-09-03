@@ -7,13 +7,15 @@ import store from './store'
 import axios from 'axios'
 import qs from 'qs'
 import md5 from 'js-md5'
+import VDistpicker from 'v-distpicker'
 
+Vue.component('v-distpicker', VDistpicker)
 Vue.use(ElementUI)
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs
 Vue.prototype.$md5 = md5
-
+axios.defaults.withCredentials=true;
 
 new Vue({
   el: '#app',

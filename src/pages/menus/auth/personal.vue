@@ -1,6 +1,6 @@
 <template>
     <div>
-
+    <div v-if="personalStatus=0">
             <div class="personal-board-verified">
                 <el-button
                         type="primary"
@@ -16,72 +16,81 @@
                 ref="AuthForm"
                 class="authform"
                 label-width="120px">
-            <my-dialog class="personal-form-dialog" :is-show="isShowBaseInfoDialog" @on-close="closeDialog('isShowBaseInfoDialog')">
-                <h3>资料填写</h3>
-                <el-form-item label="姓名" prop="name">
-                    <el-input
-                            type="text"
-                            v-model="AuthForm.name"
-                            placeholder="请输入姓名">
-                    </el-input>
-                </el-form-item>
-                <el-form-item label="身份证号" prop="user_no">
-                    <el-input
-                            type="text"
-                            v-model="AuthForm.user_no"
-                            placeholder="请输入身份证号">
-                    </el-input>
-                </el-form-item>
-                <el-row>
-                    <el-col :span="10">
-                        <el-form-item>
-                            <p>身份证正面照</p>
-                            <el-upload
-                                    action=""
-                                    :auto-upload='false'
-                                    :on-change='changeUploadPic1'
-                                    :show-file-list='false'
-                            >
-                                <img v-if="AuthForm.Pic1.url" :src="AuthForm.Pic1.url" class="avatar">
-                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-form-item>
-                            <p>身份证反面照</p>
-                            <el-upload
-                                    action=""
-                                    :auto-upload='false'
-                                    :on-change='changeUploadPic2'
-                                    :show-file-list='false'>
-                                <img v-if="AuthForm.Pic2.url" :src="AuthForm.Pic2.url" class="avatar">
-                                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-form-item>
-                    <el-button
-                            type="primary"
-                            class="nextBtn"
-                            round
-                            @click.native="submit()"
-                    >
-                        提交
-                    </el-button>
-                    <el-button
-                            type="primary"
-                            class="nextBtn"
-                            round
-                            @click.native="closeDialog('isShowBaseInfoDialog')"
-                    >
-                        返回
-                    </el-button>
-                </el-form-item>
-            </my-dialog>
+        <el-dialog
+          title="资料填写"
+          :visible.sync="isShowBaseInfoDialog"
+          width="70%"
+          >
+            <el-form-item label="姓名" prop="name">
+                <el-input
+                        type="text"
+                        v-model="AuthForm.name"
+                        placeholder="请输入姓名">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="身份证号" prop="user_no">
+                <el-input
+                        type="text"
+                        v-model="AuthForm.user_no"
+                        placeholder="请输入身份证号">
+                </el-input>
+            </el-form-item>
+            <el-row>
+                <el-col :span="10">
+                    <el-form-item>
+                        <p>身份证正面照</p>
+                        <el-upload
+                                action=""
+                                :auto-upload='false'
+                                :on-change='changeUploadPic1'
+                                :show-file-list='false'
+                        >
+                            <img v-if="AuthForm.Pic1.url" :src="AuthForm.Pic1.url" class="avatar">
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        </el-upload>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                    <el-form-item>
+                        <p>身份证反面照</p>
+                        <el-upload
+                                action=""
+                                :auto-upload='false'
+                                :on-change='changeUploadPic2'
+                                :show-file-list='false'>
+                            <img v-if="AuthForm.Pic2.url" :src="AuthForm.Pic2.url" class="avatar">
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        </el-upload>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <span slot="footer" class="dialog-footer">
+                <el-button
+                        type="primary"
+                        round
+                        @click.native="closeDialog('isShowBaseInfoDialog')"
+                >
+                    返回
+                </el-button>
+                <el-button
+                        type="primary"
+                        round
+                        @click.native="submit()"
+                >
+                    提交
+                </el-button>
+            </span>
+        </el-dialog>
         </el-form>
     </div>
+
+    <div v-else-if="personalStatus=1">
+       <span style="padding: 50px;"> 您的信息正在审核中..请耐心等待..</span>
+    </div>
+    <div v-else-if="personalStatus=2">
+        <span style="padding: 50px;"> 认证成功</span>
+    </div>
+</div>
 </template>
 
 <script>
@@ -91,6 +100,7 @@
         data() {
             return {
                 isShowBaseInfoDialog: false,
+                personalStatus: '',
                 AuthForm: {
                     name: '',
                     user_no: '',
@@ -110,7 +120,7 @@
                 }
                 console.log(AuthParams.card_pic_a)
                 // 调用axios登录接口
-                        this.$axios.post('/api/bmbucmm1/0010040.do',this.$qs.stringify(AuthParams)).then(res => {})
+                        this.$axios.post('/mrbui/bmbucmm1/0010040.do',this.$qs.stringify(AuthParams)).then(res => {})
             },
             nextDialog(now, next) {
                 this[now] = false
@@ -133,7 +143,22 @@
                     () => {
                         this.AuthForm.Pic2 = file
                     });
+            },
+            query() {
+            this.$axios.get('/mrbui/bmbucmm1/0010160.do').then(res => {
+                    if (res.data.gda.msg_cd !== 'MBU00000') {
+                        this.$message({
+                            type: 'error',
+                            message: res.data.gda.msg_cd
+                        })
+                    } else {
+                        this.personalStatus = res.data.personal_sts
+                    }
+                })
             }
+        },
+        mounted() {
+            this.query()
         },
         components: {
             MyDialog

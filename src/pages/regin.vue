@@ -44,6 +44,13 @@
                         placeholder="确认密码">
                 </el-input>
             </el-form-item>
+            <el-form-item prop="name">
+                <el-input
+                        type="text"
+                        v-model="ReginForm.realname"
+                        placeholder="请输入姓名">
+                </el-input>
+            </el-form-item>
             <el-form-item prop="regincode">
                 <el-input
                         type="text"
@@ -94,7 +101,7 @@
                 } else if (!reg.test(value)) {
                     return callback(new Error('手机格式不正确'))
                 } else{
-                    this.$axios.get('/api/bmbucmm1/0010030.do',{params:{tel:this.ReginForm.tel}}).then(res => {
+                    this.$axios.get('/mrbui/bmbucmm1/0010030.do',{params:{tel:this.ReginForm.tel}}).then(res => {
                         if (res.data.gda.msg_cd !== 'MBU00000') {
                            return callback(new Error('手机号已被注册'))
                         }
@@ -109,6 +116,7 @@
                     tel: '',
                     password: '',
                     confirmpassword: '',
+                    realname: '',
                     telcode: '',
                     regincode: ''
                 },
@@ -135,6 +143,13 @@
                             trigger: 'blur'
                         }
                     ],
+                    realname: [
+                        {
+                            required: true,
+                            message: '真实姓名必输',
+                            trigger: 'blur'
+                        }
+                    ],
                     regioncode: [
                         {
                             required: true,
@@ -156,9 +171,10 @@
                          // 登录作为参数的用户信息
                         let ReginParams = {
                             tel: this.ReginForm.tel,
-                            password: this.$md5(this.ReginForm.password)
+                            password: this.$md5(this.ReginForm.password),
+                            name: this.ReginForm.realname
                         }
-                        this.$axios.post('/api/bmbucmm1/0010020.do',this.$qs.stringify(ReginParams)).then(res => {                        
+                        this.$axios.post('/mrbui/bmbucmm1/0010020.do',this.$qs.stringify(ReginParams)).then(res => {                        
                             let {msg_cd,msg_dat} = res.data.gda
                             console.log(res.data)
                             console.log(msg_cd,msg_dat)
