@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="companyStatus=0">
+        <div v-if="companyStatus==='0'">
         <el-form
             :model="AuthForm"
             ref="AuthForm"
@@ -326,10 +326,10 @@
     </el-dialog>
  </el-form>
 </div>
-<div v-else-if="companyStatus=1">
+<div v-else-if="companyStatus==='1'">
    <span style="padding: 50px;"> 您的企业正在审核中..请耐心等待..</span>
 </div>
-<div v-else-if="companyStatus=2">
+<div v-else-if="companyStatus==='2'">
     <span style="padding: 50px;"> 认证成功</span>
 </div>
 
@@ -503,6 +503,7 @@ export default {
                             message: res.data.gda.msg_cd
                         })
                     } else {
+                        console.log(res.data)
                         this.companyStatus = res.data.company_sts
                     }
                 })

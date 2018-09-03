@@ -1,6 +1,6 @@
 <template>
     <div>
-    <div v-if="personalStatus=0">
+    <div v-if="personalStatus==='0'">
             <div class="personal-board-verified">
                 <el-button
                         type="primary"
@@ -84,17 +84,16 @@
         </el-form>
     </div>
 
-    <div v-else-if="personalStatus=1">
+    <div v-else-if="personalStatus==='1'">
        <span style="padding: 50px;"> 您的信息正在审核中..请耐心等待..</span>
     </div>
-    <div v-else-if="personalStatus=2">
+    <div v-else-if="personalStatus==='2'">
         <span style="padding: 50px;"> 认证成功</span>
     </div>
 </div>
 </template>
 
 <script>
-    import MyDialog from '../../../components/base/dialog'
     import img2base64 from '../../../utils/img2base64'
     export default {
         data() {
@@ -159,9 +158,6 @@
         },
         mounted() {
             this.query()
-        },
-        components: {
-            MyDialog
         }
     }
 </script>
