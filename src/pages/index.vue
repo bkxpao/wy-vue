@@ -18,7 +18,7 @@
             </el-button>
         </div>
     还未加入公司，请先
-    <a href="../auth/company">认证</a>一个公司，或申请<a href="#" @click="startDialog()">加入</a>一个公司
+    <a href="../#/auth/company">认证</a>一个公司，或申请<a href="#" @click="startDialog()">加入</a>一个公司
     </div>
 
     <div v-else-if="type === '1'" class="apply-board">
@@ -32,7 +32,6 @@
 </template>
 
 <script>
-    import MyDialog from '../components/base/dialog'
     export default {
         data() {
             return {

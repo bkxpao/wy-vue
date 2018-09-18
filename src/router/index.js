@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Layout from '../components/layout'
+import Welcome from '../components/Welcome'
+
 import AutherManage from '../pages/menus/account/autherManage'
 import RoleManage from '../pages/menus/account/roleManage'
 import StaffApply from '../pages/menus/account/staffApply'
@@ -10,11 +12,16 @@ import CompanyAuth from '../pages/menus/auth/company'
 import LoginPage from '../pages/login'
 import ReginPage from '../pages/regin'
 import IndexPage from '../pages/index'
+import ContactPage from '../pages/article/contact'
+import AboutPage from '../pages/article/about'
+import NotFoundPage from '../pages/notfound'
+
 
 Vue.use(Router)
 
 const router = new Router({
     mode: 'history',
+    base: '/goldchain',
     routes: [
         {
             path: '/',
@@ -61,33 +68,49 @@ const router = new Router({
                     name: '个人认证',
                     component: PersonalAuth
                 }
-            ]
-        },
-        {
-            path: '/login',
-            name: '登陆界面',
-            component: LoginPage
-        },
-        {
-            path: '/regin',
-            name: '注册界面',
-            component: ReginPage
-        }
-    ]
+
+                ]
+            },
+            {
+                path: '/',
+                name: 'Welcome',
+                component: Welcome,
+                children: [
+                {
+                    path: '/login',
+                    name: '登陆界面',
+                    component: LoginPage
+                },
+                {
+                    path: '/regin',
+                    name: '注册界面',
+                    component: ReginPage
+                },
+                {
+                    path: '/contact',
+                    name: '联系我们',
+                    component: ContactPage
+                },
+                {
+                    path: '/about',
+                    name: '关于金链',
+                    component: AboutPage
+                }
+                ]
+            },
+            { path: '*', component: NotFoundPage }
+        ]
 })
 
 router.beforeEach((to, from, next) => {
     let login = sessionStorage.getItem('token')
     let path = to.path
-    if (path === '/login') {
-        next()
-        return
-    }
-    if (path === '/regin') {
-        next()
-        return
-    }
-    if (login) {
+    let flag = path === '/account/staff'||path === '/account/apply'
+    ||path === '/account/role'||path=== '/account/auther'
+    ||path=== '/auth/company'||path==='/auth/personal'||path=== '/'
+    ||path=== '/index'
+    console.log(path)
+    if (login||(!flag)) {
         next()
     } else {
         next({

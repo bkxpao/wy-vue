@@ -1,85 +1,89 @@
 <template>
-    <el-main>
-        <el-form
-                :model="ReginForm"
-                ref="ReginForm"
-                :rules="rule"
-                class="regform"
-                label-width="0">
-
-            <h3>用户注册</h3>
-
-            <el-form-item prop="tel">
-                <el-input
-                        type="text"
-                        v-model.number="ReginForm.tel"
-                        placeholder="电话号码">
-                    <template slot="prepend">+86</template>
-                </el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-input
-                        type="text"
-                        v-model.number="ReginForm.telcode"
-                        placeholder="手机验证码"
-                        style="float:left;width:50%;">
-                </el-input>
-                <el-button type="primary"
-                           @click="sendcode"
-                           class="telcodeBtn"
-                           :disabled="getCode">{{ btntxt }}
-                </el-button>
-            </el-form-item>
-            <el-form-item prop="password">
-                <el-input
-                        type="password"
-                        v-model="ReginForm.password"
-                        placeholder="密码">
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="confirmpassword">
-                <el-input
-                        type="password"
-                        v-model="ReginForm.confirmpassword"
-                        placeholder="确认密码">
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="name">
-                <el-input
-                        type="text"
-                        v-model="ReginForm.realname"
-                        placeholder="请输入姓名">
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="regincode">
-                <el-input
-                        type="text"
-                        v-model="ReginForm.regincode"
-                        placeholder="邀请码">
-                </el-input>
-            </el-form-item>
-
-            <el-form-item >
-                <el-button
-                        type="success"
-                        class="submitBtn"
-                        round
-                        @click.native.prevent="submit"
-                        :loading="regining">
-                    注册
-                </el-button>
-                <el-button
-                        type="primary"
-                        class="resetBtn"
-                        round
-                        @click.native.prevent="reset">
-                    重置
-                </el-button>
-                <hr>
-                <p>已经有账号，马上去<span class="to" @click="tologin">登录</span></p>
-            </el-form-item>
-        </el-form>
-    </el-main>
+  <div class="register-container w1200">
+    <div class="fl">
+    <el-form
+            :model="ReginForm"
+            ref="ReginForm"
+            :rules="rule"
+            class="regform"
+            >
+        <el-form-item prop="tel">
+            <el-input
+                    type="text"
+                    v-model.number="ReginForm.tel"
+                    placeholder="电话号码">
+                <template slot="prepend">+86</template>
+            </el-input>
+        </el-form-item>
+        <el-form-item prop="telcode">
+            <el-input
+                type="text"
+                v-model.number="ReginForm.telcode"
+                maxlength="6" 
+                placeholder="手机验证码">
+                <el-button type="primary" slot="append" @click.native="sendcode" :disabled="getCode">{{ btntxt }}</el-button>
+            </el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+            <el-input
+                type="password"
+                v-model="ReginForm.password"
+                placeholder="密码">
+            </el-input>
+        </el-form-item>
+        <el-form-item prop="confirmpassword">
+            <el-input
+                type="password"
+                v-model="ReginForm.confirmpassword"
+                placeholder="确认密码">
+            </el-input>
+        </el-form-item>
+        <el-form-item prop="realname">
+            <el-input
+                type="text"
+                v-model="ReginForm.realname"
+                placeholder="请输入真实姓名">
+            </el-input>
+        </el-form-item>
+        <el-form-item v-if="ReginForm.region_type==='1'"prop="regincode">
+            <el-input
+                maxlength="16" 
+                type="text"
+                v-model="ReginForm.regincode"
+                placeholder="邀请码">
+            </el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-radio v-model="ReginForm.region_type" label="1">企业首次注册</el-radio>
+            <el-radio v-model="ReginForm.region_type" label="2">员工注册</el-radio>
+        </el-form-item>
+        <el-form-item >
+            <el-button
+                    type="primary"
+                    class="submitBtn"
+                    @click.native.prevent="submit"
+                    :loading="regining">
+                立即注册
+            </el-button>
+        </el-form-item>
+    </el-form>
+    <div class="bottom">
+                            
+        </div>
+    </div>
+    <div class="fr">
+    <!-- <img src="/images/flag.png" alt=""> --> 
+    <h1>快速<span class="yellow">30秒</span>注册你将享有</h1>
+    <ul>
+        <li><i>1.</i><span>放心服务——全程专业融资顾问指导</span></li>
+        <li class="offset"><i>2.</i><span>安心交易——金链资金安全保障</span></li>
+        <li><i>3.</i><span>凭证担保——云端存储，凭证放心管理</span></li>
+        <li class="offset"><i>4.</i><span>在线转让——买卖双方参与，交易直联</span></li>
+    </ul>
+    <p>融资的问题，我知道：<span class="yellow">xxx-xxx-xxxx</span></p>
+    </div>
+    
+  </div>
 </template>
 <script>
     import axios from 'axios'
@@ -101,12 +105,33 @@
                 } else if (!reg.test(value)) {
                     return callback(new Error('手机格式不正确'))
                 } else{
-                    this.$axios.get('/mrbui/bmbucmm1/0010030.do',{params:{tel:this.ReginForm.tel}}).then(res => {
+                    let Params = {
+                            username: this.ReginForm.tel
+                        }
+                    this.$axios.post('/mrbui/bmbucmm1/0010030.do',this.$qs.stringify(Params)).then(res => {
                         if (res.data.gda.msg_cd !== 'MBU00000') {
                            return callback(new Error('手机号已被注册'))
                         }
                         return callback()
                     })
+                }
+            }
+            let realnameCheck= (rule, value, callback) => {
+                let reg= /^[\u4E00-\u9FA5]{1,4}$/;
+                if (value === '') {
+                    return callback(new Error('真实姓名是必须的'))
+                } else if (!reg.test(value)) {
+                    return callback(new Error('请输入正确真实姓名'))
+                } else {
+                    return callback()
+                }
+            }
+            let telcodeCheck= (rule, value, callback) => {
+                let reg= /^\d{6}\b/
+                if (!reg.test(value)) {
+                    return callback(new Error('手机验证码格式不正确'))
+                } else{
+                    return callback()
                 }
             }
             return {
@@ -118,7 +143,8 @@
                     confirmpassword: '',
                     realname: '',
                     telcode: '',
-                    regincode: ''
+                    regincode: '',
+                    region_type: '1'
                 },
                 regining: false,
                 rule: {
@@ -126,6 +152,13 @@
                         {
                             required: true,
                             validator: telCheck,
+                            trigger: 'blur'
+                        }
+                    ],
+                    telcode: [
+                        {
+                            required: true,
+                            validator: telcodeCheck,
                             trigger: 'blur'
                         }
                     ],
@@ -146,15 +179,15 @@
                     realname: [
                         {
                             required: true,
-                            message: '真实姓名必输',
+                            validator: realnameCheck,
                             trigger: 'blur'
                         }
                     ],
-                    regioncode: [
+                    regincode: [
                         {
                             required: true,
-                            max: 12,
-                            min: 2,
+                            max: 16,
+                            min: 16,
                             message: '邀请码长度有误',
                             trigger: 'blur'
                         }
@@ -170,19 +203,16 @@
                         this.regining = true
                          // 登录作为参数的用户信息
                         let ReginParams = {
-                            tel: this.ReginForm.tel,
+                            username: this.ReginForm.tel,
                             password: this.$md5(this.ReginForm.password),
-                            name: this.ReginForm.realname
+                            realname: this.ReginForm.realname
                         }
                         this.$axios.post('/mrbui/bmbucmm1/0010020.do',this.$qs.stringify(ReginParams)).then(res => {                        
-                            let {msg_cd,msg_dat} = res.data.gda
-                            console.log(res.data)
-                            console.log(msg_cd,msg_dat)
-                        if (msg_cd !== 'MBU00000') {
-                            this.logining = false
+                        if (res.data.gda.msg_cd !== 'MBU00000') {
+                            this.regining = false
                             this.$message({
                                     type: 'error',
-                                    message: msg_dat
+                                    message: res.data.gda.msg_dat
                                 })
                         } else {
                             this.reset()
@@ -191,34 +221,34 @@
                                 message: '注册成功,请前往登陆页面登陆'
                             })
                         }
-
- 
-                    })
+                    }).catch((err) => {
+                          console.log(err.response);
+                        })
                     } else {
                         console.log('submit err')
                     }
+                    this.regining = false
                 })
             },
             reset () {
                 this.$refs.ReginForm.resetFields()
             },
             tologin () {
-                this.$router.push('/login')
+                this.$router.push('/mrbui/login')
             },
             //验证手机号码部分
             sendcode(){
+                // 让手机号码验证的结果弹出来
+                this.$refs.ReginForm.validateField('tel');
+                // 再验证一遍，要是手机号码没问题，就发送验证码
                 var reg=11 && /^((13|14|15|17|18)[0-9]{1}\d{8})$/;
                 console.log(this.ReginForm.tel)
-                //var url="/nptOfficialWebsite/apply/sendSms?mobile="+this.ruleForm.phone;
-                if(this.ReginForm.tel==''||!reg.test(this.ReginForm.tel)){
-                }else{
+                if(!this.ReginForm.tel==''&&reg.test(this.ReginForm.tel)){
                     this.time=60;
                     this.getCode=true;
                     this.timer();
-                    /*axios.post(url).then(
-                        res=>{
-                        this.phonedata=res.data;
-                    })*/
+                } else {
+
                 }
             },
             timer() {
@@ -239,15 +269,16 @@
 
 <style scoped>
     .regform {
-        margin: 20px auto;
-        width: 310px;
-        background: #fff;
-        box-shadow: 0 0 10px #B4BCCC;
-        padding: 30px 30px 0 30px;
+       
         border-radius: 25px;
+        text-align: right;
+        display: block;
+        margin-top: 0em;
+        width: 360px;
+
     }
     .submitBtn {
-        width: 65%;
+        width: 100%;
     }
     .to {
         color: #FA5555;
@@ -258,4 +289,68 @@
         width: 50%;
         font-size: 8px;
     }
+    .register-container {
+      background: #fff;
+      padding: 80px 15px 80px 60px;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+      height: 600px;
+    }
+    .register-container > .fl {
+      padding-right: 110px;
+      border-right: 1.5px dashed #ccc;
+    }
+    .register-container i {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff9c00;
+      padding-right: 25px;
+    }
+    .register-container .fr {
+      position: relative;
+      padding-right: 90px;
+    }
+    .register-container .fr img {
+      position: absolute;
+      right: 0;
+      top: -45px;
+    }
+    .register-container h1 {
+      color: #2d2d2d;
+      font-size: 20px;
+    }
+    .register-container ul {
+      margin-top: 40px;
+    }
+    .register-container .yellow {
+      color: #ff9c00;
+    }
+    .register-container li {
+      margin-bottom: 35px;
+    }
+    .register-container li span {
+      font-size: 16px;
+      color: #666;
+    }
+    .register-container li.offset {
+      margin-left: 70px;
+    }
+    .register-container p {
+      font-weight: bold;
+      color: #292927;
+      font-size: 16px;
+      margin-left: 40px;
+    }
+    .bottom {
+        margin-left: 75px;
+        text-align: left;
+        color: #6b6b6b;
+        font-size: 14px;
+        margin-top: 20px;
+    }
+    .fl {
+        float: left;
+    }
+
 </style>

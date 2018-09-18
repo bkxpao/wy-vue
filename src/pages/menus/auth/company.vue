@@ -449,6 +449,9 @@ export default {
                             type: 'error',
                             message: res.data.gda.msg_cd
                         })
+                    } else {
+                        this.isShowBaseInfoDialog = false
+                        this.query()
                     }
                 })
             },

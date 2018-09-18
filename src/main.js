@@ -8,15 +8,18 @@ import axios from 'axios'
 import qs from 'qs'
 import md5 from 'js-md5'
 import VDistpicker from 'v-distpicker'
+import BaiduMap from 'vue-baidu-map'
 
 Vue.component('v-distpicker', VDistpicker)
 Vue.use(ElementUI)
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 Vue.prototype.$axios = axios
 Vue.prototype.$qs = qs
 Vue.prototype.$md5 = md5
 axios.defaults.withCredentials=true;
-
+Vue.use(BaiduMap, {
+  ak: 'jMXeCGhKM9szdeWWKVMw6F9xVyE2WceI'
+})
 new Vue({
   el: '#app',
   router,

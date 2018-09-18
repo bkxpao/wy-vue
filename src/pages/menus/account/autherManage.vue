@@ -24,14 +24,14 @@
                 >
                 </el-table-column>
                 <el-table-column
-                        property="oper_role"
+                        property="role_nms"
                         label="权限"
                 >
                 </el-table-column>
             </el-table>
         </div>
         <div class="auth-manage-right">
-            <el-transfer v-model="roleValue" :props="{key: 'role_id',label: 'role_nm'}" :data="roleList"></el-transfer>
+            <el-transfer v-model="roleValue" :props="{key: 'role_id',label: 'role_nm'}" :data="roleList" :right-default-checked="[9]" ></el-transfer>
         </div>
     </div>
 </template>
@@ -97,7 +97,6 @@
                         })
                     } else {
                         this.tableData = res.data.staff_lst
-                        console.log(this.tableData)
                     }
                  })
                 this.$axios.post('/mrbui/bmbucmm1/0010090.do',this.$qs.stringify(params),).then(res => { 
@@ -107,7 +106,6 @@
                             message: res.data.gda.msg_cd
                         })
                     } else {
-                        console.log(res.data.role_lst)
                         this.roleList =  res.data.role_lst
                     }
                  })

@@ -3,8 +3,6 @@
         <div class="role-manage-left">
         <el-form :inline="true"  class="query-form" size="mini">
             <el-form-item>
-            
-
                 <el-button-group>
                     <el-button type="primary" icon="edit" @click.native="editRole()">修改</el-button>
                     <el-button type="primary" @click="dialogAddFormVisible = true">添加</el-button>
@@ -40,6 +38,7 @@
                 :data="authList"
                 show-checkbox
                 default-expand-all
+                :default-checked-keys="currentAuthList"
                 node-key="id"
                 ref="tree"
                 highlight-current
@@ -84,6 +83,7 @@
                 dialogAddFormVisible: false,
                 dialogEditFormVisible: false,
                 authList: [],
+                currentAuthList: [],
                 defaultProps: {
                     children: 'nodes',
                     label: 'name'
@@ -113,13 +113,16 @@
                 return this.$refs.singleTable.row;
             },
             handleCurrentChange(val) {
-                this.currentRow = val;
-            },
-            handleEdit(index, row) {
-                console.log(index, row);
-            },
-            handleDelete(index, row) {
-                console.log(index, row);
+                this.currentRow = val
+                if (val) {
+                    if (val.funcs) {
+                    this.$refs.tree.setCheckedKeys(val.funcs.split(','));
+                    } else {
+                        this.$refs.tree.setCheckedKeys([]);
+                    }
+                } else {
+                    this.$refs.tree.setCheckedKeys([]);
+                }
             },
             getMenuTree(data, parentid) {
                 let itemArr = []
@@ -184,6 +187,7 @@
                     func_no: this.currentFuncNo
                 }
                this.update(params)
+               this.addRoleForm = []
                this.dialogAddFormVisible= false
             },
             editRoleSubmit() {
@@ -198,42 +202,53 @@
                this.dialogEditFormVisible= false
             },
             saveAuth() {
-                let auths = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())
+                let auths = this.$refs.tree.getCheckedKeys()
                 let auths_str = ''
-                 for ( var i = 0; i <auths.length; i++){
+                for ( var i = 0; i <auths.length; i++){
                     auths_str += auths[i]+'|'
+                }
+                let half_auths = this.$refs.tree.getHalfCheckedKeys()
+                let half_auths_str = ''
+                for ( var i = 0; i <half_auths.length; i++){
+                    half_auths_str += half_auths[i]+'|'
                 }
                 let params = {
                     role_id: this.currentRow.role_id,
                     auth_lst: auths_str,
+                    half_auth_lst: half_auths_str,
                     func_no: this.currentFuncNo
                 }
+
                 this.$axios.post('/mrbui/bmbucmm1/0010110.do',this.$qs.stringify(params)).then(res => { 
-                    if (res.data.gda.msg_cd !== 'MBU00000') {
-                        this.$message({
-                            type: 'error',
-                            message: res.data.gda.msg_cd
-                        })
-                    } else {
-                        this.query()
-                    }
-                 })
-                this.$message({
-                    type: 'success',
-                    message: '保存成功'
-                })
+                        if (res.data.gda.msg_cd !== 'MBU00000') {
+                            this.$message({
+                                type: 'error',
+                                message: res.data.gda.msg_dat
+                            })
+                        } else {
+                            this.$message({
+                                type: 'success',
+                                message: '保存成功'
+                            })
+                            this.query()
+                        }
+                    })     
             },
             update(params) {
                 this.$axios.post('/mrbui/bmbucmm1/0010100.do',this.$qs.stringify(params)).then(res => { 
-                    if (res.data.gda.msg_cd !== 'MBU00000') {
-                        this.$message({
-                            type: 'error',
-                            message: res.data.gda.msg_cd
-                        })
-                    } else {
-                        this.query()
-                    }
-                 })
+                        if (res.data.gda.msg_cd !== 'MBU00000') {
+                            this.$message({
+                                type: 'error',
+                                message: res.data.gda.msg_dat
+                            })
+                        } else {
+                            this.$message({
+                                type: 'success',
+                                message: '保存成功'
+                            })
+                            this.query()
+                        }
+                    })
             },
             query() {
                 let params = {
@@ -243,11 +258,10 @@
                     if (res.data.gda.msg_cd !== 'MBU00000') {
                         this.$message({
                             type: 'error',
-                            message: res.data.gda.msg_cd
-                        })
+                            message: res.data.gda.msg_dat
+                        })  
                     } else {
                         this.tableData = res.data.role_lst
-                        console.log(this.tableData)
                     }
                  })
             }

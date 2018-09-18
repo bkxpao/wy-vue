@@ -72,15 +72,15 @@ module.exports = (options = {}) => ({
   devServer: {
     host: '127.0.0.1',
     port: 8010,
-    proxy: {
-      '/mrbui/': {
-        target: 'http://hadoop001:8580/mrbui',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/mrbui': ''
-        }
-      }
-    },
+    // proxy: {
+    //   '/mrbui/': {
+    //     target: 'http://hadoop001:8580/mrbui',
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       '^/mrbui': ''
+    //     }
+    //   }
+    // },
     historyApiFallback: {
       index: url.parse(options.dev ? '/assets/' : publicPath).pathname
     }

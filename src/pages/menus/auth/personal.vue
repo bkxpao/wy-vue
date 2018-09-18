@@ -1,6 +1,6 @@
 <template>
     <div>
-    <div v-if="personalStatus==='0'">
+        <div v-if="personalStatus==='0'">
             <div class="personal-board-verified">
                 <el-button
                         type="primary"
@@ -83,14 +83,9 @@
         </el-dialog>
         </el-form>
     </div>
-
-    <div v-else-if="personalStatus==='1'">
-       <span style="padding: 50px;"> 您的信息正在审核中..请耐心等待..</span>
+        <div v-else-if="personalStatus==='1'">待审核...</div>
+        <div v-else-if="personalStatus==='2'">审核</div>
     </div>
-    <div v-else-if="personalStatus==='2'">
-        <span style="padding: 50px;"> 认证成功</span>
-    </div>
-</div>
 </template>
 
 <script>
@@ -98,8 +93,8 @@
     export default {
         data() {
             return {
-                isShowBaseInfoDialog: false,
                 personalStatus: '',
+                isShowBaseInfoDialog: false,
                 AuthForm: {
                     name: '',
                     user_no: '',
@@ -117,9 +112,18 @@
                     card_pic_a: img2base64(this.AuthForm.Pic1.url),
                     card_pic_b: img2base64(this.AuthForm.Pic2.url)
                 }
-                console.log(AuthParams.card_pic_a)
                 // 调用axios登录接口
-                        this.$axios.post('/mrbui/bmbucmm1/0010040.do',this.$qs.stringify(AuthParams)).then(res => {})
+                        this.$axios.post('/mrbui/bmbucmm1/0010040.do',this.$qs.stringify(AuthParams)).then(res => {
+                            if (res.data.gda.msg_cd !== 'MBU00000') {
+                                this.$message({
+                                type: 'error',
+                                message: res.data.gda.msg_cd
+                                })
+                            } else {
+                              this.isShowBaseInfoDialog = false
+                              this.query()
+                            }
+                        })
             },
             nextDialog(now, next) {
                 this[now] = false
